@@ -3,5 +3,5 @@ from app.views import AlgorithmsPostView, ConvertPdfView
 
 urlpatterns = [
     path('methods/', AlgorithmsPostView.as_view(), name='methods'),
-    path("api/convert-pdf/", ConvertPdfView.as_view(), name="convert-pdf"),
+    path("convert-pdf/", ConvertPdfView.as_view(), name="convert-pdf"),
 ]
