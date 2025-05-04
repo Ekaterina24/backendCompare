@@ -23,17 +23,17 @@ class AlgorithmsPostView(APIView):
     async def post(self, request: Request):
         method = request.query_params.get("method")
         if method == "one":
-            return await self.method_one()
+            return self.method_one()
         if method == "two":
-            return await self.method_two()
+            return self.method_two()
         if method == "three":
-            return await self.method_three()
+            return self.method_three()
         return None
 
 
-    async def method_one(self):
-        img1_b64 = self.request.data.get("img1")
-        img2_b64 = self.request.data.get("img2")
+    async def method_one(self, request: Request):
+        img1_b64 = request.data.get("img1")
+        img2_b64 = request.data.get("img2")
 
         if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
@@ -63,9 +63,9 @@ class AlgorithmsPostView(APIView):
         })
 
 
-    async def method_two(self):
-        img1_b64 = self.request.data.get("img1")
-        img2_b64 = self.request.data.get("img2")
+    async def method_two(self, request: Request):
+        img1_b64 = request.data.get("img1")
+        img2_b64 = request.data.get("img2")
 
         if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
@@ -91,9 +91,9 @@ class AlgorithmsPostView(APIView):
             }
         })
 
-    async def method_three(self):
-        img1_b64 = self.request.data.get("img1")
-        img2_b64 = self.request.data.get("img2")
+    async def method_three(self, request: Request):
+        img1_b64 = request.data.get("img1")
+        img2_b64 = request.data.get("img2")
 
         if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
