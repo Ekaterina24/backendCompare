@@ -1,4 +1,3 @@
-import asyncio
 import os
 import tempfile
 from pathlib import Path
@@ -20,20 +19,20 @@ def decode_and_save_image(base64_str):
     return temp_file.name # путь к файлу
 
 class AlgorithmsPostView(APIView):
-    async def post(self, request: Request):
+    def post(self, request: Request):
         method = request.query_params.get("method")
         if method == "one":
-            return await self.method_one(request)
+            return self.method_one()
         if method == "two":
-            return await self.method_two(request)
+            return self.method_two()
         if method == "three":
-            return await self.method_three(request)
+            return self.method_three()
         return None
 
 
-    async def method_one(self, request: Request):
-        img1_b64 = request.data.get("img1")
-        img2_b64 = request.data.get("img2")
+    def method_one(self):
+        img1_b64 = self.request.data.get("img1")
+        img2_b64 = self.request.data.get("img2")
 
         if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
@@ -44,7 +43,7 @@ class AlgorithmsPostView(APIView):
         if img1_path is None or img2_path is None:
             return Response({"error": "Не удалось прочитать одно из изображений"}, status=400)
 
-        aligned_img, changed_area = await asyncio.to_thread(detect_differences, img1_path, img2_path)
+        aligned_img, changed_area = detect_differences(img1_path, img2_path)
 
         if aligned_img is None:
             return Response({"error": "Недостаточно совпадений для гомографии"}, status=400)
@@ -63,9 +62,9 @@ class AlgorithmsPostView(APIView):
         })
 
 
-    async def method_two(self, request: Request):
-        img1_b64 = request.data.get("img1")
-        img2_b64 = request.data.get("img2")
+    def method_two(self):
+        img1_b64 = self.request.data.get("img1")
+        img2_b64 = self.request.data.get("img2")
 
         if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
@@ -76,7 +75,7 @@ class AlgorithmsPostView(APIView):
         if img1_path is None or img2_path is None:
             return Response({"error": "Не удалось прочитать одно из изображений"}, status=400)
 
-        changed_area = await asyncio.to_thread(pixel_pairwise, img1_path, img2_path)
+        changed_area = pixel_pairwise(img1_path, img2_path)
 
         if changed_area is None:
             return Response({"error": "Failed to calculate difference"}, status=400)
@@ -91,9 +90,9 @@ class AlgorithmsPostView(APIView):
             }
         })
 
-    async def method_three(self, request: Request):
-        img1_b64 = request.data.get("img1")
-        img2_b64 = request.data.get("img2")
+    def method_three(self):
+        img1_b64 = self.request.data.get("img1")
+        img2_b64 = self.request.data.get("img2")
 
         if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
@@ -105,7 +104,7 @@ class AlgorithmsPostView(APIView):
             return Response({"error": "Не удалось прочитать одно из изображений"}, status=400)
 
         # Совмещение изображений фазовой корреляцией
-        aligned, _ = await asyncio.to_thread(align_with_phase_correlation, img1_path, img2_path)
+        aligned, _ = align_with_phase_correlation(img1_path, img2_path)
 
         if aligned is None:
             return Response({"error": "Failed to calculate difference"}, status=400)
@@ -121,15 +120,15 @@ class AlgorithmsPostView(APIView):
 
 
 class ConvertPdfView(APIView):
-    async def post(self, request: Request):
-        base64_pdf = request.data.get("pdf")
-        page = int(request.data.get("page", 1))
+    def post(self):
+        base64_pdf = self.request.data.get("pdf")
+        page = int(self.request.data.get("page", 1))
 
         if not base64_pdf:
             return Response({"error": "Поле 'pdf' обязательно."}, status=400)
 
         try:
-            image = await asyncio.to_thread(convert_pdf_page, base64_pdf, page)
+            image = convert_pdf_page(base64_pdf, page)
         except Exception as e:
             return Response({"error": f"Ошибка при обработке PDF: {str(e)}"}, status=500)
 
