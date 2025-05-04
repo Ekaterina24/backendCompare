@@ -18,7 +18,7 @@ class AlgorithmsGetView(APIView):
     def post(self, request):
         method = request.query_params.get("method")
         if method == "one":
-            return self.method_one()
+            return self.method_one(request)
         if method == "two":
             return self.method_two()
         if method == "three":
