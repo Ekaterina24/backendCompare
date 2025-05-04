@@ -1,7 +1,4 @@
-import os
 import tempfile
-from pathlib import Path
-import pypdfium2 as pdfium
 from rest_framework.request import Request
 
 import cv2
