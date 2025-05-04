@@ -1,9 +1,18 @@
+import tempfile
+
 import cv2
 import base64
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app.algorithm import detect_differences, pixel_pairwise, align_with_phase_correlation
+
+def decode_and_save_image(base64_str):
+    img_data = base64.b64decode(base64_str)
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+    temp_file.write(img_data)
+    temp_file.flush()
+    return temp_file.name # путь к файлу
 
 class AlgorithmsGetView(APIView):
     def post(self, request):
@@ -17,19 +26,19 @@ class AlgorithmsGetView(APIView):
         return None
 
     def method_one(self):
-        img1_path = self.request.data.get("img1_path")
-        img2_path = self.request.data.get("img2_path")
+        img1_b64 = self.request.data.get("img1")
+        img2_b64 = self.request.data.get("img2")
 
-        if not img1_path or not img2_path:
+        if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
 
-        img1 = cv2.imread(img1_path)
-        img2 = cv2.imread(img2_path)
+        img1 = decode_and_save_image(img1_b64)
+        img2 = decode_and_save_image(img2_b64)
 
         if img1 is None or img2 is None:
             return Response({"error": "Не удалось прочитать одно из изображений"}, status=400)
 
-        aligned_img, changed_area = detect_differences(img1_path, img2_path)
+        aligned_img, changed_area = detect_differences(img1_b64, img2_b64)
 
         if aligned_img is None:
             return Response({"error": "Недостаточно совпадений для гомографии"}, status=400)
