@@ -1,6 +1,7 @@
 from django.urls import path
-from app.views import AlgorithmsGetView
+from app.views import AlgorithmsPostView, ConvertPdfView
 
 urlpatterns = [
-    path('methods/', AlgorithmsGetView.as_view(), name='methods'),
+    path('methods/', AlgorithmsPostView.as_view(), name='methods'),
+    path("api/convert-pdf/", ConvertPdfView.as_view(), name="convert-pdf"),
 ]
