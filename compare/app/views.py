@@ -1,5 +1,3 @@
-import os
-
 import cv2
 import base64
 from rest_framework.response import Response
