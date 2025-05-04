@@ -25,20 +25,20 @@ class AlgorithmsGetView(APIView):
             return self.method_three()
         return None
 
-    def method_one(self):
-        img1_b64 = self.request.data.get("img1")
-        img2_b64 = self.request.data.get("img2")
+    def method_one(self, request):
+        img1_b64 = request.data.get("img1")
+        img2_b64 = request.data.get("img2")
 
         if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
 
-        img1 = decode_and_save_image(img1_b64)
-        img2 = decode_and_save_image(img2_b64)
+        img1_path = decode_and_save_image(img1_b64)
+        img2_path = decode_and_save_image(img2_b64)
 
-        if img1 is None or img2 is None:
+        if img1_path is None or img2_path is None:
             return Response({"error": "Не удалось прочитать одно из изображений"}, status=400)
 
-        aligned_img, changed_area = detect_differences(img1_b64, img2_b64)
+        aligned_img, changed_area = detect_differences(img1_path, img2_path)
 
         if aligned_img is None:
             return Response({"error": "Недостаточно совпадений для гомографии"}, status=400)
@@ -58,16 +58,16 @@ class AlgorithmsGetView(APIView):
 
 
     def method_two(self):
-        img1_path = self.request.data.get("img1_path")
-        img2_path = self.request.data.get("img2_path")
+        img1_b64 = self.request.data.get("img1")
+        img2_b64 = self.request.data.get("img2")
 
-        if not img1_path or not img2_path:
+        if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
 
-        img1 = cv2.imread(img1_path)
-        img2 = cv2.imread(img2_path)
+        img1_path = decode_and_save_image(img1_b64)
+        img2_path = decode_and_save_image(img2_b64)
 
-        if img1 is None or img2 is None:
+        if img1_path is None or img2_path is None:
             return Response({"error": "Не удалось прочитать одно из изображений"}, status=400)
 
         changed_area = pixel_pairwise(img1_path, img2_path)
@@ -86,16 +86,16 @@ class AlgorithmsGetView(APIView):
         })
 
     def method_three(self):
-        img1_path = self.request.data.get("img1_path")
-        img2_path = self.request.data.get("img2_path")
+        img1_b64 = self.request.data.get("img1")
+        img2_b64 = self.request.data.get("img2")
 
-        if not img1_path or not img2_path:
+        if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
 
-        img1 = cv2.imread(img1_path)
-        img2 = cv2.imread(img2_path)
+        img1_path = decode_and_save_image(img1_b64)
+        img2_path = decode_and_save_image(img2_b64)
 
-        if img1 is None or img2 is None:
+        if img1_path is None or img2_path is None:
             return Response({"error": "Не удалось прочитать одно из изображений"}, status=400)
 
         # Совмещение изображений фазовой корреляцией
