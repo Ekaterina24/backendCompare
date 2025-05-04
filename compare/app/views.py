@@ -1,4 +1,6 @@
+import asyncio
 import tempfile
+from rest_framework.request import Request
 
 import cv2
 import base64
@@ -15,19 +17,20 @@ def decode_and_save_image(base64_str):
     return temp_file.name # путь к файлу
 
 class AlgorithmsGetView(APIView):
-    def post(self, request):
+    async def post(self, request: Request):
         method = request.query_params.get("method")
         if method == "one":
-            return self.method_one(request)
+            return await self.method_one()
         if method == "two":
-            return self.method_two()
+            return await self.method_two()
         if method == "three":
-            return self.method_three()
+            return await self.method_three()
         return None
 
-    def method_one(self, request):
-        img1_b64 = request.data.get("img1")
-        img2_b64 = request.data.get("img2")
+
+    async def method_one(self):
+        img1_b64 = self.request.data.get("img1")
+        img2_b64 = self.request.data.get("img2")
 
         if not img1_b64 or not img2_b64:
             return Response({"error": "Both image paths are required"}, status=400)
@@ -38,7 +41,7 @@ class AlgorithmsGetView(APIView):
         if img1_path is None or img2_path is None:
             return Response({"error": "Не удалось прочитать одно из изображений"}, status=400)
 
-        aligned_img, changed_area = detect_differences(img1_path, img2_path)
+        aligned_img, changed_area = await asyncio.to_thread(detect_differences, img1_path, img2_path)
 
         if aligned_img is None:
             return Response({"error": "Недостаточно совпадений для гомографии"}, status=400)
@@ -57,7 +60,7 @@ class AlgorithmsGetView(APIView):
         })
 
 
-    def method_two(self):
+    async def method_two(self):
         img1_b64 = self.request.data.get("img1")
         img2_b64 = self.request.data.get("img2")
 
@@ -70,7 +73,7 @@ class AlgorithmsGetView(APIView):
         if img1_path is None or img2_path is None:
             return Response({"error": "Не удалось прочитать одно из изображений"}, status=400)
 
-        changed_area = pixel_pairwise(img1_path, img2_path)
+        changed_area = await asyncio.to_thread(pixel_pairwise, img1_path, img2_path)
 
         if changed_area is None:
             return Response({"error": "Failed to calculate difference"}, status=400)
@@ -85,7 +88,7 @@ class AlgorithmsGetView(APIView):
             }
         })
 
-    def method_three(self):
+    async def method_three(self):
         img1_b64 = self.request.data.get("img1")
         img2_b64 = self.request.data.get("img2")
 
@@ -99,7 +102,7 @@ class AlgorithmsGetView(APIView):
             return Response({"error": "Не удалось прочитать одно из изображений"}, status=400)
 
         # Совмещение изображений фазовой корреляцией
-        aligned, _ = align_with_phase_correlation(img1_path, img2_path)
+        aligned, _ = await asyncio.to_thread(align_with_phase_correlation, img1_path, img2_path)
 
         if aligned is None:
             return Response({"error": "Failed to calculate difference"}, status=400)
