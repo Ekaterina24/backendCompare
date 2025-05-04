@@ -23,11 +23,11 @@ class AlgorithmsPostView(APIView):
     async def post(self, request: Request):
         method = request.query_params.get("method")
         if method == "one":
-            return self.method_one(request)
+            return await self.method_one(request)
         if method == "two":
-            return self.method_two(request)
+            return await self.method_two(request)
         if method == "three":
-            return self.method_three(request)
+            return await self.method_three(request)
         return None
 
 
